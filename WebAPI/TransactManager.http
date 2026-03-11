@@ -1,0 +1,6 @@
+@TransactManager_HostAddress = http://localhost:5245
+
+GET {{TransactManager_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
