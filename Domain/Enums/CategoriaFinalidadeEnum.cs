@@ -7,6 +7,7 @@ namespace Domain.Enums
     public enum CategoriaFinalidadeEnum
     {
         [EnumMember(Value = "DESPESA")] Despesa,
-        [EnumMember(Value = "RECEITA")] Receita
+        [EnumMember(Value = "RECEITA")] Receita,
+        [EnumMember(Value = "AMBAS")] Ambas
     }
 }
