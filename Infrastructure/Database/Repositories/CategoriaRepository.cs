@@ -47,7 +47,7 @@ namespace Infrastructure.Database.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<List<Categoria>> GetAllAsync(CategoriaFinalidadeEnum? finalidade = null, string? search = null)
+        public IQueryable<Categoria> GetAllAsync(CategoriaFinalidadeEnum? finalidade = null, string? search = null)
         {
             var query = _categorias.AsQueryable().AsNoTracking();
 
@@ -57,9 +57,7 @@ namespace Infrastructure.Database.Repositories
             if(finalidade.HasValue)
                 query = query.Where(p => p.Finalidade == finalidade.Value);
 
-            return await query
-                .OrderByDescending(p => p.Id)
-                .ToListAsync();
+            return query.OrderByDescending(p => p.Id);
         }
 
         public async Task<int> GetCategoriasCountAsync()

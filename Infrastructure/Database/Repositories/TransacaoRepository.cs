@@ -48,7 +48,7 @@ namespace Infrastructure.Database.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<List<Transacao>> GetAllAsync(int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public IQueryable<Transacao> GetAllAsync(int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             var query = _transacao.AsQueryable().AsNoTracking();
 
@@ -67,9 +67,7 @@ namespace Infrastructure.Database.Repositories
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(p => p.Descricao.Contains(search));
 
-            return await query
-                .OrderByDescending(p => p.Id)
-                .ToListAsync();
+            return query.OrderByDescending(p => p.Id);
         }
 
         public async Task<int> GetTransacoesCountAsync()

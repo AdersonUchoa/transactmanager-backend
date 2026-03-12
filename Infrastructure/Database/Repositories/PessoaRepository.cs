@@ -46,16 +46,15 @@ namespace Infrastructure.Database.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<List<Pessoa>> GetAllAsync(string? search = null)
+        public IQueryable<Pessoa> GetAllAsync(string? search = null)
         {
             var query = _pessoas.AsQueryable().AsNoTracking();
+
             if (!string.IsNullOrEmpty(search))
-            {
                 query = query.Where(p => p.Nome.Contains(search));
-            }
-            return await query
-                .OrderByDescending(p => p.Id)
-                .ToListAsync();
+
+            return query.OrderByDescending(p => p.Id);
+
         }
 
         public async Task<int> GetPessoasCountAsync()

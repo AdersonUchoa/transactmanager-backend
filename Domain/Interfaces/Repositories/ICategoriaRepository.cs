@@ -9,7 +9,7 @@ namespace Domain.Interfaces.Repositories
         Task<Categoria> UpdateAsync(Categoria categoria);
         Task<bool> DeleteAsync(int id);
         Task<Categoria?> GetByIdAsync(int id);
-        Task<List<Categoria>> GetAllAsync(CategoriaFinalidadeEnum? finalidade = null, string? search = null);
+        IQueryable<Categoria> GetAllAsync(CategoriaFinalidadeEnum? finalidade = null, string? search = null);
         Task<int> GetCategoriasCountAsync();
     }
 }
