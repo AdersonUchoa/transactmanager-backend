@@ -1,4 +1,9 @@
-﻿namespace WebAPI.IoC
+﻿using Application.Interfaces;
+using Application.Mappers.Profiles;
+using Application.Services;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace WebAPI.IoC
 {
     public static class ApplicationDependencyInjection
     {
@@ -9,16 +14,14 @@
         }
         private static void AddServices(IServiceCollection services)
         {
-            //services.AddScoped<IAdministradorService, AdministradorService>();
-            //services.AddScoped<IInquilinoService, InquilinoService>();
-            //services.AddScoped<IImovelService, ImovelService>();
-            //services.AddScoped<IAluguelService, AluguelService>();
-            //services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<ICategoriaService, CategoriaService>();
+            services.AddScoped<IPessoaService, PessoaService>();
+            services.AddScoped<ITransacaoService, TransacaoService>();
         }
 
         private static void AddAutoMapper(IServiceCollection services)
         {
-            //Futura implementação do AutoMapper, se necessário.
+            services.AddAutoMapper(cfg => cfg.AddMaps(typeof(PessoaProfile).Assembly));
         }
     }
 }
