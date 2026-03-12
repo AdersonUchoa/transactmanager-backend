@@ -11,6 +11,6 @@ namespace Application.Requests.Categoria
 
         [Required(ErrorMessage = "A finalidade é obrigatória.")]
         [EnumDataType(typeof(TransacoesTipoEnum), ErrorMessage = "A finalidade informada é inválida.")]
-        public string Finalidade { get; set; } = null!;
+        public CategoriaFinalidadeEnum Finalidade { get; set; }
     }
 }

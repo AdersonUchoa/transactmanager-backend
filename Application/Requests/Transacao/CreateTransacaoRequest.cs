@@ -15,7 +15,7 @@ namespace Application.Requests.Transacao
 
         [Required(ErrorMessage = "O tipo é obrigatório.")]
         [EnumDataType(typeof(TransacoesTipoEnum), ErrorMessage = "O tipo informado é inválido.")]
-        public string Tipo { get; set; } = null!;
+        public TransacoesTipoEnum Tipo { get; set; }
 
         [Required(ErrorMessage = "A categoria é obrigatória.")]
         [Range(0, double.MaxValue, ErrorMessage = "O Id da categoria deve ser maior que 0.")]

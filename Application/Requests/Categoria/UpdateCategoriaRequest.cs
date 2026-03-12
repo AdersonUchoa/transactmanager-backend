@@ -9,6 +9,6 @@ namespace Application.Requests.Categoria
         public string? Descricao { get; set; }
 
         [EnumDataType(typeof(TransacoesTipoEnum), ErrorMessage = "A finalidade informada é inválida.")]
-        public string? Finalidade { get; set; }
+        public CategoriaFinalidadeEnum? Finalidade { get; set; }
     }
 }

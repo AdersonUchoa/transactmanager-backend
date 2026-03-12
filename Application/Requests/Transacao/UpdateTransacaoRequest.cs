@@ -12,7 +12,7 @@ namespace Application.Requests.Transacao
         public decimal? Valor { get; set; }
 
         [EnumDataType(typeof(TransacoesTipoEnum), ErrorMessage = "O tipo informado é inválido.")]
-        public string? Tipo { get; set; }
+        public TransacoesTipoEnum? Tipo { get; set; }
 
         [Range(0, double.MaxValue, ErrorMessage = "O Id da categoria deve ser maior que 0.")]
         public int? CategoriaId { get; set; }
