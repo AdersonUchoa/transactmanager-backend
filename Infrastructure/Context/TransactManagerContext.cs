@@ -71,11 +71,12 @@ public partial class TransactManagerContext : DbContext
 
             entity.HasOne(d => d.Categoria).WithMany(p => p.Transacoes)
                 .HasForeignKey(d => d.CategoriaId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("transacoes_categoria_id_fkey");
 
             entity.HasOne(d => d.Pessoa).WithMany(p => p.Transacoes)
                 .HasForeignKey(d => d.PessoaId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("transacoes_pessoa_id_fkey");
         });
 
