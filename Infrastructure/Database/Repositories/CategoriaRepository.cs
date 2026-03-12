@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -46,13 +47,16 @@ namespace Infrastructure.Database.Repositories
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<List<Categoria>> GetAllAsync(string? search = null)
+        public async Task<List<Categoria>> GetAllAsync(CategoriaFinalidadeEnum? finalidade = null, string? search = null)
         {
             var query = _categorias.AsQueryable().AsNoTracking();
+
             if (!string.IsNullOrEmpty(search))
-            {
                 query = query.Where(p => p.Descricao.Contains(search));
-            }
+
+            if(finalidade.HasValue)
+                query = query.Where(p => p.Finalidade == finalidade.Value);
+
             return await query
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
