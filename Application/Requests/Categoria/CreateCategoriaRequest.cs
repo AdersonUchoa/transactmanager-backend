@@ -10,7 +10,7 @@ namespace Application.Requests.Categoria
         public string Descricao { get; set; } = null!;
 
         [Required(ErrorMessage = "A finalidade é obrigatória.")]
-        [EnumDataType(typeof(TransacoesTipoEnum), ErrorMessage = "A finalidade informada é inválida.")]
+        [EnumDataType(typeof(CategoriaFinalidadeEnum), ErrorMessage = "A finalidade informada é inválida.")]
         public CategoriaFinalidadeEnum Finalidade { get; set; }
     }
 }

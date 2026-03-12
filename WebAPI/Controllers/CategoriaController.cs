@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/v1/categoria")]
+    [Route("api/v1/categorias")]
     public class CategoriaController : BaseController
     {
         private readonly ICategoriaService _categoriaService;
@@ -19,7 +19,7 @@ namespace WebAPI.Controllers
         /// Cadastra uma nova categoria.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult> AddAsync([FromBody] CreateCategoriaRequest request)
+        public async Task<ActionResult> AddAsync([FromQuery] CreateCategoriaRequest request)
         {
             var result = await _categoriaService.AddAsync(request);
             return StatusCode((int)result.StatusCode, result);
@@ -49,7 +49,7 @@ namespace WebAPI.Controllers
         /// Atualiza uma categoria existente.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromBody] UpdateCategoriaRequest request)
+        public async Task<ActionResult> UpdateAsync(int id, [FromQuery] UpdateCategoriaRequest request)
         {
             var result = await _categoriaService.UpdateAsync(id, request);
             return StatusCode((int)result.StatusCode, result);

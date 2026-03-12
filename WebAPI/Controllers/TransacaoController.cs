@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebAPI.Controllers
 {
-    [Route("api/v1/transacao")]
+    [Route("api/v1/transacoes")]
     public class TransacaoController : BaseController
     {
         private readonly ITransacaoService _transacaoService;
@@ -19,7 +19,7 @@ namespace WebAPI.Controllers
         /// Adiciona uma nova transação.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult> AddAsync([FromBody] CreateTransacaoRequest request)
+        public async Task<ActionResult> AddAsync([FromQuery] CreateTransacaoRequest request)
         {
             var result = await _transacaoService.AddAsync(request);
             return StatusCode((int)result.StatusCode, result);
@@ -39,7 +39,7 @@ namespace WebAPI.Controllers
         /// Atualiza uma transação existente por ID.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromBody] UpdateTransacaoRequest request)
+        public async Task<ActionResult> UpdateAsync(int id, [FromQuery] UpdateTransacaoRequest request)
         {
             var result = await _transacaoService.UpdateAsync(id, request);
             return StatusCode((int)result.StatusCode, result);

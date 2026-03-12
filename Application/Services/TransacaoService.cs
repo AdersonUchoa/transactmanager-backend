@@ -121,6 +121,8 @@ namespace Application.Services
                     Descricao = transacao.Descricao,
                     Valor = transacao.Valor,
                     Tipo = transacao.Tipo.Value(),
+                    CategoriaId = transacao.CategoriaId,
+                    PessoaId = transacao.PessoaId,
                     Categoria = new CategoriaResponse
                     {
                         Id = transacao.Categoria.Id,
