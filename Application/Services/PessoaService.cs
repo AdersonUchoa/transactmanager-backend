@@ -15,11 +15,13 @@ namespace Application.Services
     public class PessoaService : IPessoaService
     {
         private readonly IPessoaRepository _pessoaRepository;
+        private readonly ITransacaoRepository _transacaoRepository;
         private readonly IMapper _mapper;
 
-        public PessoaService(IPessoaRepository pessoaRepository, IMapper mapper)
+        public PessoaService(IPessoaRepository pessoaRepository, ITransacaoRepository transacaoRepository, IMapper mapper)
         {
             _pessoaRepository = pessoaRepository;
+            _transacaoRepository = transacaoRepository;
             _mapper = mapper;
         }
 
@@ -74,6 +76,8 @@ namespace Application.Services
                 var pessoa = await _pessoaRepository.GetByIdAsync(id);
                 if (pessoa == null) return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
 
+                var (receitas, despesas) = await _transacaoRepository.GetTotalsByPessoaIdAsync(pessoa.Id);
+
                 var response = new PessoaByIdResponse
                 {
                     Id = pessoa.Id,
@@ -87,7 +91,10 @@ namespace Application.Services
                         Tipo = t.Tipo.Value(),
                         CategoriaId = t.CategoriaId,
                         PessoaId = t.PessoaId
-                    })]
+                    })],
+                    TotalReceitas = receitas,
+                    TotalDespesas = despesas,
+                    Saldo = receitas - despesas
                 };
 
                 return new ApiResponse<PessoaByIdResponse>(true, HttpStatusCode.OK, response, "Pessoa recuperada com sucesso.", null, null);
@@ -109,11 +116,21 @@ namespace Application.Services
 
                 var paginated = await PaginatedResult<Pessoa>.CreateAsync(pessoas, page, limit);
 
-                var response = pessoas.Select(p => new PessoaResponse
+                var ids = paginated.Items.Select(p => p.Id);
+                var totaisDict = await _transacaoRepository.GetTotalsByPessoaIdsAsync(ids);
+
+                var response = paginated.Items.Select(p =>
                 {
-                    Id = p.Id,
-                    Nome = p.Nome,
-                    Idade = p.Idade
+                    var (receitas, despesas) = totaisDict[p.Id];
+                    return new PessoaResponse
+                    {
+                        Id = p.Id,
+                        Nome = p.Nome,
+                        Idade = p.Idade,
+                        TotalReceitas = receitas,
+                        TotalDespesas = despesas,
+                        Saldo = receitas - despesas
+                    };
                 }).ToList();
 
                 var result = new PaginatedResult<PessoaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);

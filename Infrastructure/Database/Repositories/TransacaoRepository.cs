@@ -106,5 +106,75 @@ namespace Infrastructure.Database.Repositories
         {
             return await _transacao.CountAsync();
         }
+
+        public async Task<(decimal Receitas, decimal Despesas)> GetTotalsByPessoaIdAsync(int pessoaId)
+        {
+            var receitas = await _transacao
+                .Where(t => t.PessoaId == pessoaId && t.Tipo == TransacoesTipoEnum.Receita)
+                .SumAsync(t => t.Valor);
+
+            var despesas = await _transacao
+                .Where(t => t.PessoaId == pessoaId && t.Tipo == TransacoesTipoEnum.Despesa)
+                .SumAsync(t => t.Valor);
+
+            return (receitas, despesas);
+        }
+
+        public async Task<(decimal Receitas, decimal Despesas)> GetTotalsByCategoriaIdAsync(int categoriaId)
+        {
+            var receitas = await _transacao
+                .Where(t => t.CategoriaId == categoriaId && t.Tipo == TransacoesTipoEnum.Receita)
+                .SumAsync(t => t.Valor);
+
+            var despesas = await _transacao
+                .Where(t => t.CategoriaId == categoriaId && t.Tipo == TransacoesTipoEnum.Despesa)
+                .SumAsync(t => t.Valor);
+
+            return (receitas, despesas);
+        }
+
+        public async Task<Dictionary<int, (decimal Receitas, decimal Despesas)>> GetTotalsByCategoriaIdsAsync(IEnumerable<int> categoriaIds)
+        {
+            var resultado = await _transacao
+                .Where(t => categoriaIds.Contains(t.CategoriaId))
+                .GroupBy(t => new { t.CategoriaId, t.Tipo })
+                .Select(g => new
+                {
+                    g.Key.CategoriaId,
+                    g.Key.Tipo,
+                    Total = g.Sum(t => t.Valor)
+                })
+                .ToListAsync();
+
+            return categoriaIds.ToDictionary(
+                id => id,
+                id => (
+                    Receitas: resultado.FirstOrDefault(r => r.CategoriaId == id && r.Tipo == TransacoesTipoEnum.Receita)?.Total ?? 0,
+                    Despesas: resultado.FirstOrDefault(r => r.CategoriaId == id && r.Tipo == TransacoesTipoEnum.Despesa)?.Total ?? 0
+                )
+            );
+        }
+
+        public async Task<Dictionary<int, (decimal Receitas, decimal Despesas)>> GetTotalsByPessoaIdsAsync(IEnumerable<int> pessoaIds)
+        {
+            var resultado = await _transacao
+                .Where(t => pessoaIds.Contains(t.PessoaId))
+                .GroupBy(t => new { t.PessoaId, t.Tipo })
+                .Select(g => new
+                {
+                    g.Key.PessoaId,
+                    g.Key.Tipo,
+                    Total = g.Sum(t => t.Valor)
+                })
+                .ToListAsync();
+
+            return pessoaIds.ToDictionary(
+                id => id,
+                id => (
+                    Receitas: resultado.FirstOrDefault(r => r.PessoaId == id && r.Tipo == TransacoesTipoEnum.Receita)?.Total ?? 0,
+                    Despesas: resultado.FirstOrDefault(r => r.PessoaId == id && r.Tipo == TransacoesTipoEnum.Despesa)?.Total ?? 0
+                )
+            );
+        }
     }
 }

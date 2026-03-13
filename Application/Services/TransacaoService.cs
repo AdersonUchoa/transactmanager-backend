@@ -164,7 +164,7 @@ namespace Application.Services
 
                 var paginated = await PaginatedResult<Transacao>.CreateAsync(transacoes, page, limit);
 
-                var response = transacoes.Select(t => new TransacaoResponse
+                var response = paginated.Items.Select(t => new TransacaoResponse
                 {
                     Id = t.Id,
                     Descricao = t.Descricao,

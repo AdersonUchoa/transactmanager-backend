@@ -3,6 +3,7 @@ using Application.Pagination;
 using Application.Requests.Categoria;
 using Application.Responses;
 using Application.Responses.Categoria;
+using Application.Responses.Pessoa;
 using Application.Responses.Transacao;
 using AutoMapper;
 using Domain.Entities;
@@ -16,11 +17,13 @@ namespace Application.Services
     public class CategoriaService : ICategoriaService
     {
         private readonly ICategoriaRepository _categoriaRepository;
+        private readonly ITransacaoRepository _transacaoRepository; 
         private readonly IMapper _mapper;
 
-        public CategoriaService(ICategoriaRepository categoriaRepository, IMapper mapper)
+        public CategoriaService(ICategoriaRepository categoriaRepository, ITransacaoRepository transacaoRepository, IMapper mapper)
         {
             _categoriaRepository = categoriaRepository;
+            _transacaoRepository = transacaoRepository;
             _mapper = mapper;
         }
 
@@ -75,6 +78,8 @@ namespace Application.Services
                 var categoria = await _categoriaRepository.GetByIdAsync(id);
                 if (categoria == null) return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
 
+                var (receitas, despesas) = await _transacaoRepository.GetTotalsByCategoriaIdAsync(categoria.Id);
+
                 var response = new CategoriaByIdResponse
                 {
                     Id = categoria.Id,
@@ -88,7 +93,10 @@ namespace Application.Services
                         Tipo = t.Tipo.Value(),
                         PessoaId = t.PessoaId,
                         CategoriaId = t.CategoriaId
-                    })]
+                    })],
+                    TotalDespesas = despesas,
+                    TotalReceitas = receitas,
+                    Saldo = receitas - despesas
                 };
                 return new ApiResponse<CategoriaByIdResponse>(true, HttpStatusCode.OK, response, "Categoria retrieved successfully", null, null);
             }
@@ -126,11 +134,21 @@ namespace Application.Services
 
                 var paginated = await PaginatedResult<Categoria>.CreateAsync(categorias, page, limit);
 
-                var response = categorias.Select(c => new CategoriaResponse
+                var ids = paginated.Items.Select(c => c.Id);
+                var totaisDict = await _transacaoRepository.GetTotalsByCategoriaIdsAsync(ids);
+
+                var response = paginated.Items.Select(c =>
                 {
-                    Id = c.Id,
-                    Descricao = c.Descricao,
-                    Finalidade = c.Finalidade.Value(),
+                    var (receitas, despesas) = totaisDict[c.Id];
+                    return new CategoriaResponse
+                    {
+                        Id = c.Id,
+                        Descricao = c.Descricao,
+                        Finalidade = c.Finalidade.Value(),
+                        TotalReceitas = receitas,
+                        TotalDespesas = despesas,
+                        Saldo = receitas - despesas
+                    };
                 }).ToList();
 
                 var result = new PaginatedResult<CategoriaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
