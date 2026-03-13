@@ -1,6 +1,8 @@
 ﻿using Application.Requests.Transacao;
+using Application.Responses.Transacao;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Extensions;
 
 namespace Application.Mappers.Profiles
 {
@@ -18,6 +20,9 @@ namespace Application.Mappers.Profiles
                 .ForMember(dest => dest.Pessoa, opt => opt.Ignore())
                 .ForMember(dest => dest.Categoria, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Transacao, TransacaoResponse>()
+                .ForMember(dest => dest.Tipo, opt => opt.MapFrom(src => src.Tipo.Value()));
         }
     }
 }

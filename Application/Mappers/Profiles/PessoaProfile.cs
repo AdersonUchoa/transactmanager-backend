@@ -1,4 +1,5 @@
 ﻿using Application.Requests.Pessoa;
+using Application.Responses.Pessoa;
 using AutoMapper;
 using Domain.Entities;
 
@@ -15,6 +16,8 @@ namespace Application.Mappers.Profiles
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.Transacoes, opt => opt.Ignore())
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+
+            CreateMap<Pessoa, PessoaResponse>();
         }
     }
 }

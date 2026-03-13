@@ -85,20 +85,11 @@ namespace Application.Services
                 var transacao = await _transacaoRepository.GetByIdAsync(id);
                 if (transacao == null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada", null, null);
 
-                _mapper.Map(request, transacao);
+                transacao.Update(request.Descricao, request.Valor, request.Tipo, request.CategoriaId, request.PessoaId);
+
                 var updated = await _transacaoRepository.UpdateAsync(transacao);
 
-                var response = new TransacaoResponse
-                {
-                    Id = updated.Id,
-                    Descricao = updated.Descricao,
-                    Valor = updated.Valor,
-                    Tipo = updated.Tipo.Value(),
-                    CategoriaId = updated.CategoriaId,
-                    PessoaId = updated.PessoaId
-                };
-
-                //TODO: Verify transacao.UpdateFields(), porque o Mapper Profile não lida bem com os nullables do update request
+                var response = _mapper.Map<TransacaoResponse>(updated);
 
                 return new ApiResponse<TransacaoResponse>(true, HttpStatusCode.OK, response, "Transação atualizada com sucesso", null, null);
             }

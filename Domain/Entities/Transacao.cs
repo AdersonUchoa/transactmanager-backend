@@ -23,4 +23,13 @@ public partial class Transacao
         CategoriaId = categoriaId;
         PessoaId = pessoaId;
     }
+
+    public void Update(string? newDescricao, decimal? newValor, TransacoesTipoEnum? newTipo, int? newCategoriaId, int? newPessoaId)
+    {
+        Descricao = newDescricao ?? Descricao;
+        Valor = newValor ?? Valor;
+        Tipo = newTipo ?? Tipo;
+        CategoriaId = newCategoriaId ?? CategoriaId;
+        PessoaId = newPessoaId ?? PessoaId;
+    }
 }

@@ -16,4 +16,10 @@ public partial class Categoria
         Descricao = descricao;
         Finalidade = finalidade;
     }
+
+    public void Update(string? newDescricao, CategoriaFinalidadeEnum? newFinalidade)
+    {
+        Descricao = newDescricao ?? Descricao;
+        Finalidade = newFinalidade ?? Finalidade;
+    }
 }

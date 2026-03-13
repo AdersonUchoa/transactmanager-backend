@@ -50,20 +50,15 @@ namespace Application.Services
         {
             try
             {
-                var existing = await _pessoaRepository.GetByIdAsync(id);
-                if (existing == null) return new ApiResponse<PessoaResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
+                var pessoa = await _pessoaRepository.GetByIdAsync(id);
+                if (pessoa == null) return new ApiResponse<PessoaResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
 
-                _mapper.Map(request, existing);
-                var updated = await _pessoaRepository.UpdateAsync(existing);
+                pessoa.Update(request.Nome, request.Idade);
 
-                var response = new PessoaResponse
-                {
-                    Id = updated.Id,
-                    Nome = updated.Nome,
-                    Idade = updated.Idade
-                };
+                var updated = await _pessoaRepository.UpdateAsync(pessoa);
 
-                //TODO: Verify pessoa.UpdateFields(), porque o Mapper Profile não lida bem com os nullables do update request
+                var response = _mapper.Map<PessoaResponse>(updated);
+
                 return new ApiResponse<PessoaResponse>(true, HttpStatusCode.OK, response, "Pessoa atualizada com sucesso.", null, null);
             }
             catch (Exception ex)

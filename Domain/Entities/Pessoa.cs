@@ -14,4 +14,10 @@ public partial class Pessoa
         Nome = nome;
         Idade = idade;
     }
+
+    public void Update(string? newName, int? newAge)
+    {
+        Nome = newName ?? Nome;
+        Idade = newAge ?? Idade;
+    }
 }

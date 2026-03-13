@@ -51,19 +51,15 @@ namespace Application.Services
         {
             try
             {
-                var existing = await _categoriaRepository.GetByIdAsync(id);
-                if (existing == null) return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
+                var categoria = await _categoriaRepository.GetByIdAsync(id);
+                if (categoria == null) return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
 
-                _mapper.Map(request, existing);
-                var updated = await _categoriaRepository.UpdateAsync(existing);
+                categoria.Update(request.Descricao, request.Finalidade);
 
-                var response = new CategoriaResponse
-                {
-                    Id = updated.Id,
-                    Descricao = updated.Descricao,
-                    Finalidade = updated.Finalidade.Value(),
-                };
-                //TODO: Verify categoria.UpdateFields(), porque o Mapper Profile não lida bem com os nullables do update request
+                var updated = await _categoriaRepository.UpdateAsync(categoria);
+
+                var response = _mapper.Map<CategoriaResponse>(updated);
+
                 return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.OK, response, "Categoria atualizada com sucesso", null, null);
             }
             catch (Exception ex)
