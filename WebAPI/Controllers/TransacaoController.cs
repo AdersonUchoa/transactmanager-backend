@@ -66,6 +66,26 @@ namespace WebAPI.Controllers
         }
 
         /// <summary>
+        /// Obtém uma lista de transações com paginação e filtros opcionais de uma pessoa específica.
+        /// </summary>
+        [HttpGet("/pessoas/{pessoaId}")]
+        public async Task<ActionResult> GetAllByPessoaIdAsync(int pessoaId, int page = 1, int limit = 10, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            var result = await _transacaoService.GetAllByPessoaIdAsync(pessoaId, page, limit, valor, tipo, search);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        /// <summary>
+        /// Obtém uma lista de transações com paginação e filtros opcionais de uma categoria específica.
+        /// </summary>
+        [HttpGet("/categorias/{categoriaId}")]
+        public async Task<ActionResult> GetAllByCategoriaIdAsync(int categoriaId, int page = 1, int limit = 10, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            var result = await _transacaoService.GetAllByCategoriaIdAsync(categoriaId, page, limit, valor, tipo, search);
+            return StatusCode((int)result.StatusCode, result);
+        }
+
+        /// <summary>
         /// Obtém a contagem total de transações.
         /// </summary>
         [HttpGet("count")]

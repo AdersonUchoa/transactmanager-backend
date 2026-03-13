@@ -11,5 +11,7 @@ namespace Domain.Interfaces.Repositories
         Task<Transacao?> GetByIdAsync(int id);
         IQueryable<Transacao> GetAllAsync(int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null);
         Task<int> GetTransacoesCountAsync();
+        IQueryable<Transacao> GetByPessoaIdAsync(int pessoaId, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null);
+        IQueryable<Transacao> GetByCategoriaIdAsync(int categoriaId, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null);
     }
 }

@@ -70,6 +70,38 @@ namespace Infrastructure.Database.Repositories
             return query.OrderByDescending(p => p.Id);
         }
 
+        public IQueryable<Transacao> GetByPessoaIdAsync(int pessoaId, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            var query = _transacao.AsQueryable().Where(p => p.PessoaId == pessoaId).AsNoTracking();
+
+            if (valor.HasValue)
+                query = query.Where(p => p.Valor == valor.Value);
+
+            if (tipo.HasValue)
+                query = query.Where(p => p.Tipo == tipo.Value);
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(p => p.Descricao.Contains(search));
+
+            return query.OrderByDescending(p => p.Id);
+        }
+
+        public IQueryable<Transacao> GetByCategoriaIdAsync(int categoriaId, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            var query = _transacao.AsQueryable().Where(p => p.CategoriaId == categoriaId).AsNoTracking();
+
+            if (valor.HasValue)
+                query = query.Where(p => p.Valor == valor.Value);
+
+            if (tipo.HasValue)
+                query = query.Where(p => p.Tipo == tipo.Value);
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(p => p.Descricao.Contains(search));
+
+            return query.OrderByDescending(p => p.Id);
+        }
+
         public async Task<int> GetTransacoesCountAsync()
         {
             return await _transacao.CountAsync();

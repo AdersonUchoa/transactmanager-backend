@@ -184,6 +184,74 @@ namespace Application.Services
             }
         }
 
+        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllByPessoaIdAsync(int pessoaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(search))
+                    search = search.Trim();
+
+                var pessoa = await _pessoaRepository.GetByIdAsync(pessoaId);
+                if (pessoa is null) return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null, null);
+
+                var transacoes = _transacaoRepository.GetByPessoaIdAsync(pessoa.Id, valor, tipo, search);
+
+                var paginated = await PaginatedResult<Transacao>.CreateAsync(transacoes, page, limit);
+
+                var response = paginated.Items.Select(t => new TransacaoResponse
+                {
+                    Id = t.Id,
+                    Descricao = t.Descricao,
+                    Valor = t.Valor,
+                    Tipo = t.Tipo.Value(),
+                    CategoriaId = t.CategoriaId,
+                    PessoaId = t.PessoaId
+                }).ToList();
+
+                var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
+
+                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações de {pessoa.Nome} encontradas com sucesso.", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving transactions for the person: {ex.Message}", null, null);
+            }
+        }
+
+        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllByCategoriaIdAsync(int categoriaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(search))
+                    search = search.Trim();
+
+                var categoria = await _categoriaRepository.GetByIdAsync(categoriaId);
+                if (categoria is null) return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
+
+                var transacoes = _transacaoRepository.GetByCategoriaIdAsync(categoria.Id, valor, tipo, search);
+
+                var paginated = await PaginatedResult<Transacao>.CreateAsync(transacoes, page, limit);
+
+                var response = paginated.Items.Select(t => new TransacaoResponse
+                {
+                    Id = t.Id,
+                    Descricao = t.Descricao,
+                    Valor = t.Valor,
+                    Tipo = t.Tipo.Value(),
+                    CategoriaId = t.CategoriaId,
+                    PessoaId = t.PessoaId
+                }).ToList();
+
+                var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
+
+                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações da categoria {categoria.Descricao} encontradas com sucesso.", null, null);
+            }
+            catch (Exception ex)
+            {
+                return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving transactions for the category: {ex.Message}", null, null);
+            }
+        }
+
         public async Task<ApiResponse<int>> GetTransacoesCountAsync()
         {
             try
