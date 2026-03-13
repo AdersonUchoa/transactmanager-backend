@@ -68,7 +68,7 @@ namespace WebAPI.Controllers
         /// <summary>
         /// Obtém uma lista de transações com paginação e filtros opcionais de uma pessoa específica.
         /// </summary>
-        [HttpGet("/pessoas/{pessoaId}")]
+        [HttpGet("/api/v1/transacoes/pessoas/{pessoaId}")]
         public async Task<ActionResult> GetAllByPessoaIdAsync(int pessoaId, int page = 1, int limit = 10, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             var result = await _transacaoService.GetAllByPessoaIdAsync(pessoaId, page, limit, valor, tipo, search);
@@ -78,7 +78,7 @@ namespace WebAPI.Controllers
         /// <summary>
         /// Obtém uma lista de transações com paginação e filtros opcionais de uma categoria específica.
         /// </summary>
-        [HttpGet("/categorias/{categoriaId}")]
+        [HttpGet("/api/v1/transacoes/categorias/{categoriaId}")]
         public async Task<ActionResult> GetAllByCategoriaIdAsync(int categoriaId, int page = 1, int limit = 10, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             var result = await _transacaoService.GetAllByCategoriaIdAsync(categoriaId, page, limit, valor, tipo, search);
