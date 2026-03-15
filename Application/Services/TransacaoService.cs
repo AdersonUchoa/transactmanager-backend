@@ -10,6 +10,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 
 namespace Application.Services
@@ -87,9 +88,21 @@ namespace Application.Services
 
                 transacao.Update(request.Descricao, request.Valor, request.Tipo, request.CategoriaId, request.PessoaId);
 
-                var updated = await _transacaoRepository.UpdateAsync(transacao);
+                await _transacaoRepository.UpdateAsync(transacao);
 
-                var response = _mapper.Map<TransacaoResponse>(updated);
+                var updated = await _transacaoRepository.GetByIdAsync(id);
+
+                var response = new TransacaoResponse
+                {
+                    Id = updated!.Id,
+                    Descricao = updated.Descricao,
+                    Valor = updated.Valor,
+                    Tipo = updated.Tipo.Value(),
+                    CategoriaId = updated.CategoriaId,
+                    PessoaId = updated.PessoaId,
+                    Categoria = new CategoriaBasicResponse { Descricao = updated.Categoria.Descricao, Finalidade = updated.Categoria.Finalidade.Value() },
+                    Pessoa = new PessoaBasicResponse { Nome = updated.Pessoa.Nome, Idade = updated.Pessoa.Idade }
+                };
 
                 return new ApiResponse<TransacaoResponse>(true, HttpStatusCode.OK, response, "Transação atualizada com sucesso", null, null);
             }
@@ -171,7 +184,9 @@ namespace Application.Services
                     Valor = t.Valor,
                     Tipo = t.Tipo.Value(),
                     CategoriaId = t.CategoriaId,
-                    PessoaId = t.PessoaId
+                    PessoaId = t.PessoaId,
+                    Categoria = new CategoriaBasicResponse { Descricao = t.Categoria.Descricao, Finalidade = t.Categoria.Finalidade.Value() },
+                    Pessoa = new PessoaBasicResponse { Nome = t.Pessoa.Nome, Idade = t.Pessoa.Idade }
                 }).ToList();
 
                 var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);

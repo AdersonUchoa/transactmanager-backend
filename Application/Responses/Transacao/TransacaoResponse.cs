@@ -1,4 +1,7 @@
-﻿namespace Application.Responses.Transacao
+﻿using Application.Responses.Categoria;
+using Application.Responses.Pessoa;
+
+namespace Application.Responses.Transacao
 {
     public class TransacaoResponse
     {
@@ -8,5 +11,7 @@
         public string Tipo { get; set; } = null!;
         public int CategoriaId { get; set; }
         public int PessoaId { get; set; }
+        public CategoriaBasicResponse? Categoria { get; set; }
+        public PessoaBasicResponse? Pessoa { get; set; }
     }
 }

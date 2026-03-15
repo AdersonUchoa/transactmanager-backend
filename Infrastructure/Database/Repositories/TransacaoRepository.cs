@@ -67,7 +67,10 @@ namespace Infrastructure.Database.Repositories
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(p => p.Descricao.Contains(search));
 
-            return query.OrderByDescending(p => p.Id);
+            return query
+                .Include(p => p.Categoria)
+                .Include(p => p.Pessoa)
+                .OrderByDescending(p => p.Id);
         }
 
         public IQueryable<Transacao> GetByPessoaIdAsync(int pessoaId, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
