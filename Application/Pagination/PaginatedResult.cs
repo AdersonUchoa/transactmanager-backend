@@ -2,7 +2,7 @@
 
 namespace Application.Pagination
 {
-    public sealed class PaginatedResult<T> : List<T> where T : class
+    public sealed class PaginatedResult<T> where T : class
     {
         public int PageIndex { get; }
         public int TotalPages { get; }
@@ -17,8 +17,6 @@ namespace Application.Pagination
             PageIndex = pageIndex;
             TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             Items = items;
-
-            AddRange(items);
         }
 
         public static async Task<PaginatedResult<T>> CreateAsync(IQueryable<T> source, int pageIndex, int pageSize)
