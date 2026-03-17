@@ -52,7 +52,7 @@ namespace Infrastructure.Database.Repositories
             var query = _categorias.AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Descricao.Contains(search));
+                query = query.Where(p => p.Descricao.ToLower().Contains(search.ToLower()));
 
             if(finalidade.HasValue)
                 query = query.Where(p => p.Finalidade == finalidade.Value);

@@ -65,7 +65,7 @@ namespace Infrastructure.Database.Repositories
                 query = query.Where(p => p.Tipo == tipo.Value);
 
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Descricao.Contains(search));
+                query = query.Where(p => p.Descricao.ToLower().Contains(search.ToLower()));
 
             return query
                 .Include(p => p.Categoria)

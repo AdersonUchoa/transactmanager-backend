@@ -51,7 +51,7 @@ namespace Infrastructure.Database.Repositories
             var query = _pessoas.AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Nome.Contains(search));
+                query = query.Where(p => p.Nome.ToLower().Contains(search.ToLower()));
 
             return query.OrderByDescending(p => p.Id);
 
