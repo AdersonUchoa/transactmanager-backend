@@ -9,6 +9,7 @@ namespace Domain.Interfaces.Repositories
         Task<Transacao> UpdateAsync(Transacao transacao);
         Task<bool> DeleteAsync(int id);
         Task<Transacao?> GetByIdAsync(int id);
+        Task<Transacao?> GetByIdNoTrackingAsync(int id);
         IQueryable<Transacao> GetAllAsync(int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null);
         Task<int> GetTransacoesCountAsync();
         Task<(decimal Receitas, decimal Despesas)> GetTotalsByPessoaIdAsync(int pessoaId);

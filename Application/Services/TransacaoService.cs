@@ -61,10 +61,10 @@ namespace Application.Services
 
         private async Task<ApiResponse<TransacaoResponse>> ValidateTransacaoCreation(CreateTransacaoRequest request)
         {
-            var pessoa = await _pessoaRepository.GetByIdAsync(request.PessoaId);
+            var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(request.PessoaId);
             if (pessoa is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null, null);
 
-            var categoria = await _categoriaRepository.GetByIdAsync(request.CategoriaId);
+            var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(request.CategoriaId);
             if (categoria is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
 
             if (pessoa.Idade < 18 && request.Tipo != TransacoesTipoEnum.Despesa)
@@ -116,7 +116,7 @@ namespace Application.Services
         {
             try
             {
-                var transacao = await _transacaoRepository.GetByIdAsync(id);
+                var transacao = await _transacaoRepository.GetByIdNoTrackingAsync(id);
                 if (transacao == null) return new ApiResponse<TransacaoByIdResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada", null, null);
 
                 var response = new TransacaoByIdResponse
@@ -206,7 +206,7 @@ namespace Application.Services
                 if (!string.IsNullOrWhiteSpace(search))
                     search = search.Trim();
 
-                var pessoa = await _pessoaRepository.GetByIdAsync(pessoaId);
+                var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(pessoaId);
                 if (pessoa is null) return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null, null);
 
                 var transacoes = _transacaoRepository.GetByPessoaIdAsync(pessoa.Id, valor, tipo, search);

@@ -3,7 +3,6 @@ using Application.Pagination;
 using Application.Requests.Categoria;
 using Application.Responses;
 using Application.Responses.Categoria;
-using Application.Responses.Pessoa;
 using Application.Responses.Transacao;
 using AutoMapper;
 using Domain.Entities;
@@ -75,7 +74,7 @@ namespace Application.Services
         {
             try
             {
-                var categoria = await _categoriaRepository.GetByIdAsync(id);
+                var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(id);
                 if (categoria == null) return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
 
                 var (receitas, despesas) = await _transacaoRepository.GetTotalsByCategoriaIdAsync(categoria.Id);

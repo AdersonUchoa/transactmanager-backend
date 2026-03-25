@@ -73,7 +73,7 @@ namespace Application.Services
         {
             try
             {
-                var pessoa = await _pessoaRepository.GetByIdAsync(id);
+                var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(id);
                 if (pessoa == null) return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
 
                 var (receitas, despesas) = await _transacaoRepository.GetTotalsByPessoaIdAsync(pessoa.Id);

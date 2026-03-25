@@ -43,6 +43,15 @@ namespace Infrastructure.Database.Repositories
         public async Task<Categoria?> GetByIdAsync(int id)
         {
             return await _categorias
+                .AsTracking()
+                .Include(p => p.Transacoes)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public async Task<Categoria?> GetByIdNoTrackingAsync(int id)
+        {
+            return await _categorias
+                .AsNoTracking()
                 .Include(p => p.Transacoes)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }

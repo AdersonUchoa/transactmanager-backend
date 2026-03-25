@@ -8,6 +8,7 @@ namespace Domain.Interfaces.Repositories
         Task<Pessoa> UpdateAsync(Pessoa pessoa);
         Task<bool> DeleteAsync(int id);
         Task<Pessoa?> GetByIdAsync(int id);
+        Task<Pessoa?> GetByIdNoTrackingAsync(int id);
         IQueryable<Pessoa> GetAllAsync(string? search = null);
         Task<int> GetPessoasCountAsync();
     }
