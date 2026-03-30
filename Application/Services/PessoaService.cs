@@ -41,11 +41,11 @@ namespace Application.Services
                     Idade = created.Idade
                 };
 
-                return new ApiResponse<PessoaResponse>(true, HttpStatusCode.Created, response, "Pessoa criada com sucesso.", null, null);
+                return new ApiResponse<PessoaResponse>(true, HttpStatusCode.Created, response, "Pessoa criada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<PessoaResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while creating the person: {ex.Message}", null, null);
+                return new ApiResponse<PessoaResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -54,7 +54,7 @@ namespace Application.Services
             try
             {
                 var pessoa = await _pessoaRepository.GetByIdAsync(id);
-                if (pessoa == null) return new ApiResponse<PessoaResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
+                if (pessoa == null) return new ApiResponse<PessoaResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null);
 
                 pessoa.Update(request.Nome, request.Idade);
 
@@ -62,11 +62,11 @@ namespace Application.Services
 
                 var response = _mapper.Map<PessoaResponse>(updated);
 
-                return new ApiResponse<PessoaResponse>(true, HttpStatusCode.OK, response, "Pessoa atualizada com sucesso.", null, null);
+                return new ApiResponse<PessoaResponse>(true, HttpStatusCode.OK, response, "Pessoa atualizada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<PessoaResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while updating the person: {ex.Message}", null, null);
+                return new ApiResponse<PessoaResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -75,7 +75,7 @@ namespace Application.Services
             try
             {
                 var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(id);
-                if (pessoa == null) return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null, null);
+                if (pessoa == null) return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null);
 
                 var (receitas, despesas) = await _transacaoRepository.GetTotalsByPessoaIdAsync(pessoa.Id);
 
@@ -98,11 +98,11 @@ namespace Application.Services
                     Saldo = receitas - despesas
                 };
 
-                return new ApiResponse<PessoaByIdResponse>(true, HttpStatusCode.OK, response, "Pessoa recuperada com sucesso.", null, null);
+                return new ApiResponse<PessoaByIdResponse>(true, HttpStatusCode.OK, response, "Pessoa recuperada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving the person: {ex.Message}", null, null);
+                return new ApiResponse<PessoaByIdResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -140,7 +140,7 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<PessoaResponse>>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving people: {ex.Message}", null, null);
+                return new ApiResponse<List<PessoaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -149,15 +149,15 @@ namespace Application.Services
             try
             {
                 var pessoa = await _pessoaRepository.GetByIdAsync(id);
-                if (pessoa == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Pessoa não encontrada.", null, null);
+                if (pessoa == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Pessoa não encontrada.", null);
 
                 await _pessoaRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Pessoa deletada com sucesso.", null, null);
+                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Pessoa deletada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while deleting the person: {ex.Message}", null, null);
+                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -167,11 +167,11 @@ namespace Application.Services
             {
                 var count = await _pessoaRepository.GetPessoasCountAsync();
 
-                return new ApiResponse<int>(true, HttpStatusCode.OK, count, "Contagem de pessoas recuperada com sucesso.", null, null);
+                return new ApiResponse<int>(true, HttpStatusCode.OK, count, "Contagem de pessoas recuperada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while counting people: {ex.Message}", null, null);
+                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
     }

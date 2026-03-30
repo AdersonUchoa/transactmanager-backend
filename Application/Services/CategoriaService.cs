@@ -42,11 +42,11 @@ namespace Application.Services
                     Finalidade = created.Finalidade.Value(),
                 };
 
-                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.Created, response, "Categoria criada com sucesso", null, null);
+                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.Created, response, "Categoria criada com sucesso", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while creating the category: {ex.Message}", null, null);
+                return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -55,7 +55,7 @@ namespace Application.Services
             try
             {
                 var categoria = await _categoriaRepository.GetByIdAsync(id);
-                if (categoria == null) return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
+                if (categoria == null) return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null);
 
                 categoria.Update(request.Descricao, request.Finalidade);
 
@@ -63,11 +63,11 @@ namespace Application.Services
 
                 var response = _mapper.Map<CategoriaResponse>(updated);
 
-                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.OK, response, "Categoria atualizada com sucesso", null, null);
+                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.OK, response, "Categoria atualizada com sucesso", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while updating the category: {ex.Message}", null, null);
+                return new ApiResponse<CategoriaResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Application.Services
             try
             {
                 var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(id);
-                if (categoria == null) return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null, null);
+                if (categoria == null) return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null);
 
                 var (receitas, despesas) = await _transacaoRepository.GetTotalsByCategoriaIdAsync(categoria.Id);
 
@@ -98,11 +98,11 @@ namespace Application.Services
                     TotalReceitas = receitas,
                     Saldo = receitas - despesas
                 };
-                return new ApiResponse<CategoriaByIdResponse>(true, HttpStatusCode.OK, response, "Categoria retrieved successfully", null, null);
+                return new ApiResponse<CategoriaByIdResponse>(true, HttpStatusCode.OK, response, "Categoria retrieved successfully", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving the category: {ex.Message}", null, null);
+                return new ApiResponse<CategoriaByIdResponse>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -111,15 +111,15 @@ namespace Application.Services
             try
             {
                 var categoria = await _categoriaRepository.GetByIdAsync(id);
-                if (categoria == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada", null, null);
+                if (categoria == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada", null);
 
                 await _categoriaRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Categoria deletada com sucesso.", null, null);
+                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Categoria deletada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving the category: {ex.Message}", null, null);
+                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -157,7 +157,7 @@ namespace Application.Services
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<CategoriaResponse>>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while retrieving categories: {ex.Message}", null, null);
+                return new ApiResponse<List<CategoriaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
@@ -167,11 +167,11 @@ namespace Application.Services
             {
                 var categorias = await _categoriaRepository.GetCategoriasCountAsync();
 
-                return new ApiResponse<int>(true, HttpStatusCode.OK, categorias, "Contagem de categorias obtida com sucesso.", null, null);
+                return new ApiResponse<int>(true, HttpStatusCode.OK, categorias, "Contagem de categorias obtida com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, $"An error occurred while counting categories: {ex.Message}", null, null);
+                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
     }
