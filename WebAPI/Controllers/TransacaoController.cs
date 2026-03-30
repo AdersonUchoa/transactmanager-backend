@@ -61,7 +61,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
-            var result = await _transacaoService.GetAllAsync(page, limit, pessoaId, categoriaId, valor, tipo, search);
+            var result = await _transacaoService.GetAllAsync(Response, page, limit, pessoaId, categoriaId, valor, tipo, search);
             return StatusCode((int)result.StatusCode, result);
         }
 

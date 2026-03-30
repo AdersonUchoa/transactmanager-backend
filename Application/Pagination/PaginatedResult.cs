@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Application.Pagination
 {
@@ -9,6 +10,8 @@ namespace Application.Pagination
         public int TotalCount { get; }
         public int PageSize { get; }
         public IReadOnlyList<T> Items { get; }
+        public bool HasPreviousPage => PageIndex > 1;
+        public bool HasNextPage => PageIndex < TotalPages;
 
         public PaginatedResult(List<T> items, int count, int pageIndex, int pageSize)
         {
@@ -31,7 +34,18 @@ namespace Application.Pagination
             return new PaginatedResult<T>(items, count, pageIndex, pageSize);
         }
 
-        public bool HasPreviousPage => PageIndex > 1;
-        public bool HasNextPage => PageIndex < TotalPages;
+        public string ToHeaders()
+        {
+            var metadata = new
+            {
+                PageIndex,
+                PageSize,
+                TotalCount,
+                TotalPages,
+                HasPreviousPage,
+                HasNextPage
+            };
+            return JsonSerializer.Serialize(metadata);
+        }
     }
 }

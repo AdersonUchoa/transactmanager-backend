@@ -9,6 +9,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -122,7 +123,7 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<List<CategoriaResponse>>> GetAllAsync(int page, int limit, CategoriaFinalidadeEnum? finalidade = null, string? search = null)
+        public async Task<ApiResponse<List<CategoriaResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, CategoriaFinalidadeEnum? finalidade = null, string? search = null)
         {
             try
             {
@@ -149,10 +150,10 @@ namespace Application.Services
                         Saldo = receitas - despesas
                     };
                 }).ToList();
+                
+                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
 
-                var result = new PaginatedResult<CategoriaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
-
-                return new ApiResponse<List<CategoriaResponse>>(true, HttpStatusCode.OK, result, "Categorias obtidas com sucesso.", null, null);
+                return new ApiResponse<List<CategoriaResponse>>(true, HttpStatusCode.OK, response, "Categorias obtidas com sucesso.", null);
             }
             catch (Exception ex)
             {

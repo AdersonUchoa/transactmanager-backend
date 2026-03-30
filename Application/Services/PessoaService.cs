@@ -8,6 +8,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -105,7 +106,7 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<List<PessoaResponse>>> GetAllAsync(int page, int limit, string? search = null)
+        public async Task<ApiResponse<List<PessoaResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, string? search = null)
         {
             try
             {
@@ -133,9 +134,9 @@ namespace Application.Services
                     };
                 }).ToList();
 
-                var result = new PaginatedResult<PessoaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
+                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
 
-                return new ApiResponse<List<PessoaResponse>>(true, HttpStatusCode.OK, result, "Pessoas recuperadas com sucesso.", null, null);
+                return new ApiResponse<List<PessoaResponse>>(true, HttpStatusCode.OK, response, "Pessoas recuperadas com sucesso.", null);
             }
             catch (Exception ex)
             {

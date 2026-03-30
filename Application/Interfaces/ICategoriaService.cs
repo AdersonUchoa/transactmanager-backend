@@ -2,6 +2,7 @@
 using Application.Responses;
 using Application.Responses.Categoria;
 using Domain.Enums;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Interfaces
 {
@@ -10,7 +11,7 @@ namespace Application.Interfaces
         Task<ApiResponse<CategoriaResponse>> AddAsync(CreateCategoriaRequest request);
         Task<ApiResponse<CategoriaResponse>> UpdateAsync(int id, UpdateCategoriaRequest request);
         Task<ApiResponse<CategoriaByIdResponse>> GetByIdAsync(int id);
-        Task<ApiResponse<List<CategoriaResponse>>> GetAllAsync(int page, int limit, CategoriaFinalidadeEnum? finalidade = null, string? search = null);
+        Task<ApiResponse<List<CategoriaResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, CategoriaFinalidadeEnum? finalidade = null, string? search = null);
         Task<ApiResponse<bool>> DeleteAsync(int id);
         Task<ApiResponse<int>> GetCategoriasCountAsync();
     }

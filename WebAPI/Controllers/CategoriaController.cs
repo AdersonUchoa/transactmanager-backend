@@ -41,7 +41,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, string? search = null, CategoriaFinalidadeEnum? finalidade = null)
         {
-            var result = await _categoriaService.GetAllAsync(page, limit, finalidade, search);
+            var result = await _categoriaService.GetAllAsync(Response, page, limit, finalidade, search);
             return StatusCode((int)result.StatusCode, result);
         }
 

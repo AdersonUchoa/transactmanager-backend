@@ -98,7 +98,8 @@ namespace WebAPI.IoC
                 {
                     builder.AllowAnyOrigin()
                            .AllowAnyMethod()
-                           .AllowAnyHeader();
+                           .AllowAnyHeader()
+                           .WithExposedHeaders("x-pagination");
                 });
             });
         }

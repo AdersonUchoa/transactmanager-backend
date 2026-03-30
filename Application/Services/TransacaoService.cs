@@ -10,7 +10,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -166,7 +166,7 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllAsync(int page, int limit, int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             try
             {
@@ -189,9 +189,9 @@ namespace Application.Services
                     Pessoa = new PessoaBasicResponse { Nome = t.Pessoa.Nome, Idade = t.Pessoa.Idade }
                 }).ToList();
 
-                var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
+                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
 
-                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, result, "Transações encontradas com sucesso.", null, null);
+                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, response, "Transações encontradas com sucesso.", null);
             }
             catch (Exception ex)
             {

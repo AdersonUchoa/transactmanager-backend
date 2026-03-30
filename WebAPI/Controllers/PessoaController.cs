@@ -40,7 +40,7 @@ namespace WebAPI.Controllers
         [HttpGet]
         public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, string? search = null)
         {
-            var result = await _pessoaService.GetAllAsync(page, limit, search);
+            var result = await _pessoaService.GetAllAsync(Response, page, limit, search);
             return StatusCode((int)result.StatusCode, result);
         }
 
