@@ -18,16 +18,14 @@ namespace Infrastructure.Database.Repositories
 
         public async Task<Pessoa> AddAsync(Pessoa pessoa)
         {
-            _pessoas.Add(pessoa);
-            await _context.SaveChangesAsync();
+            await _pessoas.AddAsync(pessoa);
             return pessoa;
         }
 
-        public async Task<Pessoa> UpdateAsync(Pessoa pessoa)
+        public Task<Pessoa> UpdateAsync(Pessoa pessoa)
         {
             _pessoas.Update(pessoa);
-            await _context.SaveChangesAsync();
-            return pessoa;
+            return Task.FromResult(pessoa);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -35,7 +33,6 @@ namespace Infrastructure.Database.Repositories
             var pessoa = await _pessoas.FindAsync(id);
             if (pessoa == null) return false;
             _pessoas.Remove(pessoa);
-            await _context.SaveChangesAsync();
             return true;
         }
 

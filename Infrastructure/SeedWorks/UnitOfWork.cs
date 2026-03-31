@@ -18,7 +18,9 @@ namespace Infrastructure.SeedWorks
         public async Task CommitAsync(CancellationToken cancellationToken = default)
         {
             await _entityFrameworkContext.SaveChangesAsync(cancellationToken);
-            await _entityFrameworkContext.Database.CommitTransactionAsync(cancellationToken);
+
+            if (_entityFrameworkContext.Database.CurrentTransaction != null)
+                await _entityFrameworkContext.Database.CommitTransactionAsync(cancellationToken);
         }
 
         private void Disposing(bool disposing)

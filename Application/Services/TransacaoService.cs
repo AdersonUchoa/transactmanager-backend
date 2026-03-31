@@ -10,6 +10,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.SeedWorks;
 using System.Net;
 
 namespace Application.Services
@@ -20,25 +21,35 @@ namespace Application.Services
         private readonly IPessoaRepository _pessoaRepository;
         private readonly ICategoriaRepository _categoriaRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public TransacaoService(ITransacaoRepository transacaoRepository, IMapper mapper, ICategoriaRepository categoriaRepository, IPessoaRepository pessoaRepository)
+        public TransacaoService(ITransacaoRepository transacaoRepository, IMapper mapper, ICategoriaRepository categoriaRepository, IPessoaRepository pessoaRepository, IUnitOfWork unitOfWork)
         {
             _transacaoRepository = transacaoRepository;
             _mapper = mapper;
             _categoriaRepository = categoriaRepository;
             _pessoaRepository = pessoaRepository;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<TransacaoResponse>> AddAsync(CreateTransacaoRequest request)
         {
             try
             {
-                var validation = await ValidateTransacaoCreation(request);
-                if (!validation.Success) return validation;
+                var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(request.PessoaId);
+                if (pessoa is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada.", null);
+
+                var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(request.CategoriaId);
+                if (categoria is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada.", null);
+
+                var validation = Transacao.ValidateCreation(pessoa, categoria, request.Tipo);
+                if(validation != null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.BadRequest, null, validation, null);
 
                 var transacao = _mapper.Map<Transacao>(request);
 
                 var created = await _transacaoRepository.AddAsync(transacao);
+
+                await _unitOfWork.SaveChangesAsync();
 
                 var response = new TransacaoResponse
                 {
@@ -58,52 +69,30 @@ namespace Application.Services
             }
         }
 
-        private async Task<ApiResponse<TransacaoResponse>> ValidateTransacaoCreation(CreateTransacaoRequest request)
-        {
-            var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(request.PessoaId);
-            if (pessoa is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null);
-
-            var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(request.CategoriaId);
-            if (categoria is null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null);
-
-            if (pessoa.Idade < 18 && request.Tipo != TransacoesTipoEnum.Despesa)
-                return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.BadRequest, null, "Pessoas menores de 18 anos só podem criar transações do tipo despesa", null);
-
-            var categoriaIncompativel = (categoria.Finalidade == CategoriaFinalidadeEnum.Despesa && request.Tipo != TransacoesTipoEnum.Despesa)
-                || (categoria.Finalidade == CategoriaFinalidadeEnum.Receita && request.Tipo != TransacoesTipoEnum.Receita);
-
-            if (categoriaIncompativel)
-                return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.BadRequest, null, "A categoria informada é incompatível com o tipo da transação", null);
-
-            return new ApiResponse<TransacaoResponse>(true, HttpStatusCode.OK, null, "Validação concluída com sucesso", null);
-        }
-
         public async Task<ApiResponse<TransacaoResponse>> UpdateAsync(int id, UpdateTransacaoRequest request)
         {
             try
             {
                 var transacao = await _transacaoRepository.GetByIdAsync(id);
-                if (transacao == null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada", null);
+                if (transacao == null) return new ApiResponse<TransacaoResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada.", null);
 
                 transacao.Update(request.Descricao, request.Valor, request.Tipo, request.CategoriaId, request.PessoaId);
 
-                await _transacaoRepository.UpdateAsync(transacao);
-
-                var updated = await _transacaoRepository.GetByIdAsync(id);
+                await _unitOfWork.SaveChangesAsync();
 
                 var response = new TransacaoResponse
                 {
-                    Id = updated!.Id,
-                    Descricao = updated.Descricao,
-                    Valor = updated.Valor,
-                    Tipo = updated.Tipo.Value(),
-                    CategoriaId = updated.CategoriaId,
-                    PessoaId = updated.PessoaId,
-                    Categoria = new CategoriaBasicResponse { Descricao = updated.Categoria.Descricao, Finalidade = updated.Categoria.Finalidade.Value() },
-                    Pessoa = new PessoaBasicResponse { Nome = updated.Pessoa.Nome, Idade = updated.Pessoa.Idade }
+                    Id = transacao.Id,
+                    Descricao = transacao.Descricao,
+                    Valor = transacao.Valor,
+                    Tipo = transacao.Tipo.Value(),
+                    CategoriaId = transacao.CategoriaId,
+                    PessoaId = transacao.PessoaId,
+                    Categoria = new CategoriaBasicResponse { Descricao = transacao.Categoria.Descricao, Finalidade = transacao.Categoria.Finalidade.Value() },
+                    Pessoa = new PessoaBasicResponse { Nome = transacao.Pessoa.Nome, Idade = transacao.Pessoa.Idade }
                 };
 
-                return new ApiResponse<TransacaoResponse>(true, HttpStatusCode.OK, response, "Transação atualizada com sucesso", null);
+                return new ApiResponse<TransacaoResponse>(true, HttpStatusCode.OK, response, "Transação atualizada com sucesso.", null);
             }
             catch (Exception ex)
             {
@@ -116,7 +105,7 @@ namespace Application.Services
             try
             {
                 var transacao = await _transacaoRepository.GetByIdNoTrackingAsync(id);
-                if (transacao == null) return new ApiResponse<TransacaoByIdResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada", null);
+                if (transacao == null) return new ApiResponse<TransacaoByIdResponse>(false, HttpStatusCode.NotFound, null, "Transação não encontrada.", null);
 
                 var response = new TransacaoByIdResponse
                 {
@@ -140,7 +129,7 @@ namespace Application.Services
                     }
                 };
 
-                return new ApiResponse<TransacaoByIdResponse>(true, HttpStatusCode.OK, response, "Transação encontrada com sucesso", null);
+                return new ApiResponse<TransacaoByIdResponse>(true, HttpStatusCode.OK, response, "Transação encontrada com sucesso.", null);
             }
             catch (Exception ex)
             {
@@ -156,6 +145,8 @@ namespace Application.Services
                 if (transacao is null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, null, "Transação não encontrada.", null);
 
                 await _transacaoRepository.DeleteAsync(id);
+
+                await _unitOfWork.SaveChangesAsync();
 
                 return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Transação deletada com sucesso.", null);
             }

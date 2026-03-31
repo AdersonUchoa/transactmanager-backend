@@ -19,16 +19,14 @@ namespace Infrastructure.Database.Repositories
 
         public async Task<Categoria> AddAsync(Categoria categoria)
         {
-            _categorias.Add(categoria);
-            await _context.SaveChangesAsync();
+            await _categorias.AddAsync(categoria);
             return categoria;
         }
 
-        public async Task<Categoria> UpdateAsync(Categoria categoria)
+        public Task<Categoria> UpdateAsync(Categoria categoria)
         {
             _categorias.Update(categoria);
-            await _context.SaveChangesAsync();
-            return categoria;
+            return Task.FromResult(categoria);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -36,7 +34,6 @@ namespace Infrastructure.Database.Repositories
             var categoria = await _categorias.FindAsync(id);
             if (categoria == null) return false;
             _categorias.Remove(categoria);
-            await _context.SaveChangesAsync();
             return true;
         }
 

@@ -19,16 +19,14 @@ namespace Infrastructure.Database.Repositories
 
         public async Task<Transacao> AddAsync(Transacao transacao)
         {
-            _transacao.Add(transacao);
-            await _context.SaveChangesAsync();
+            await _transacao.AddAsync(transacao);
             return transacao;
         }
 
-        public async Task<Transacao> UpdateAsync(Transacao transacao)
+        public Task<Transacao> UpdateAsync(Transacao transacao)
         {
             _transacao.Update(transacao);
-            await _context.SaveChangesAsync();
-            return transacao;
+            return Task.FromResult(transacao);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -36,7 +34,6 @@ namespace Infrastructure.Database.Repositories
             var transacao = await _transacao.FindAsync(id);
             if (transacao == null) return false;
             _transacao.Remove(transacao);
-            await _context.SaveChangesAsync();
             return true;
         }
 

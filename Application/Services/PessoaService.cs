@@ -8,6 +8,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.SeedWorks;
 using System.Net;
 
 namespace Application.Services
@@ -17,12 +18,14 @@ namespace Application.Services
         private readonly IPessoaRepository _pessoaRepository;
         private readonly ITransacaoRepository _transacaoRepository;
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public PessoaService(IPessoaRepository pessoaRepository, ITransacaoRepository transacaoRepository, IMapper mapper)
+        public PessoaService(IPessoaRepository pessoaRepository, ITransacaoRepository transacaoRepository, IMapper mapper, IUnitOfWork unitOfWork)
         {
             _pessoaRepository = pessoaRepository;
             _transacaoRepository = transacaoRepository;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<PessoaResponse>> AddAsync(CreatePessoaRequest request)
@@ -32,6 +35,8 @@ namespace Application.Services
                 var pessoa = _mapper.Map<Pessoa>(request);
 
                 var created = await _pessoaRepository.AddAsync(pessoa);
+
+                await _unitOfWork.SaveChangesAsync();
 
                 var response = new PessoaResponse
                 {
@@ -57,9 +62,9 @@ namespace Application.Services
 
                 pessoa.Update(request.Nome, request.Idade);
 
-                var updated = await _pessoaRepository.UpdateAsync(pessoa);
+                await _unitOfWork.SaveChangesAsync();
 
-                var response = _mapper.Map<PessoaResponse>(updated);
+                var response = _mapper.Map<PessoaResponse>(pessoa);
 
                 return new ApiResponse<PessoaResponse>(true, HttpStatusCode.OK, response, "Pessoa atualizada com sucesso.", null);
             }
@@ -151,6 +156,8 @@ namespace Application.Services
                 if (pessoa == null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, false, "Pessoa não encontrada.", null);
 
                 await _pessoaRepository.DeleteAsync(id);
+
+                await _unitOfWork.SaveChangesAsync();
 
                 return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Pessoa deletada com sucesso.", null);
             }

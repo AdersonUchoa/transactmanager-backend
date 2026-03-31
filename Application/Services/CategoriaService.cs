@@ -8,6 +8,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
+using Domain.Interfaces.SeedWorks;
 using System.Net;
 
 namespace Application.Services
@@ -17,12 +18,14 @@ namespace Application.Services
         private readonly ICategoriaRepository _categoriaRepository;
         private readonly ITransacaoRepository _transacaoRepository; 
         private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoriaService(ICategoriaRepository categoriaRepository, ITransacaoRepository transacaoRepository, IMapper mapper)
+        public CategoriaService(ICategoriaRepository categoriaRepository, ITransacaoRepository transacaoRepository, IMapper mapper, IUnitOfWork unitOfWork)
         {
             _categoriaRepository = categoriaRepository;
             _transacaoRepository = transacaoRepository;
             _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<ApiResponse<CategoriaResponse>> AddAsync(CreateCategoriaRequest request)
@@ -33,6 +36,8 @@ namespace Application.Services
 
                 var created = await _categoriaRepository.AddAsync(categoria);
 
+                await _unitOfWork.SaveChangesAsync();
+
                 var response = new CategoriaResponse
                 {
                     Id = created.Id,
@@ -40,7 +45,7 @@ namespace Application.Services
                     Finalidade = created.Finalidade.Value(),
                 };
 
-                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.Created, response, "Categoria criada com sucesso", null);
+                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.Created, response, "Categoria criada com sucesso.", null);
             }
             catch (Exception ex)
             {
@@ -57,11 +62,11 @@ namespace Application.Services
 
                 categoria.Update(request.Descricao, request.Finalidade);
 
-                var updated = await _categoriaRepository.UpdateAsync(categoria);
+                await _unitOfWork.SaveChangesAsync();
 
-                var response = _mapper.Map<CategoriaResponse>(updated);
+                var response = _mapper.Map<CategoriaResponse>(categoria);
 
-                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.OK, response, "Categoria atualizada com sucesso", null);
+                return new ApiResponse<CategoriaResponse>(true, HttpStatusCode.OK, response, "Categoria atualizada com sucesso.", null);
             }
             catch (Exception ex)
             {
@@ -96,7 +101,8 @@ namespace Application.Services
                     TotalReceitas = receitas,
                     Saldo = receitas - despesas
                 };
-                return new ApiResponse<CategoriaByIdResponse>(true, HttpStatusCode.OK, response, "Categoria retrieved successfully", null);
+
+                return new ApiResponse<CategoriaByIdResponse>(true, HttpStatusCode.OK, response, "Categoria obtida com sucesso.", null);
             }
             catch (Exception ex)
             {
@@ -109,11 +115,13 @@ namespace Application.Services
             try
             {
                 var categoria = await _categoriaRepository.GetByIdAsync(id);
-                if (categoria == null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada", null);
+                if (categoria == null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada.", null);
 
                 await _categoriaRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Categoria deletada com sucesso.", null);
+                await _unitOfWork.SaveChangesAsync();
+
+                return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Categoria removida com sucesso.", null);
             }
             catch (Exception ex)
             {
