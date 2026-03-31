@@ -61,9 +61,9 @@ namespace Infrastructure.Database.Repositories
             var query = _categorias.AsQueryable().AsNoTracking();
 
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Descricao.ToLower().Contains(search.ToLower()));
+                query = query.Where(p => EF.Functions.ILike(p.Descricao, $"%{search}%")); //Melhor tratado para PostgreSQL, que é o banco de dados utilizado. Com MySQL ou SQL Server, pode usar Contains normalmente.
 
-            if(finalidade.HasValue)
+            if (finalidade.HasValue)
                 query = query.Where(p => p.Finalidade == finalidade.Value);
 
             return query.OrderByDescending(p => p.Id);

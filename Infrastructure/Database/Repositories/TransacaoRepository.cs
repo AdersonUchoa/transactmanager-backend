@@ -75,7 +75,7 @@ namespace Infrastructure.Database.Repositories
                 query = query.Where(p => p.Tipo == tipo.Value);
 
             if (!string.IsNullOrEmpty(search))
-                query = query.Where(p => p.Descricao.ToLower().Contains(search.ToLower()));
+                query = query.Where(p => EF.Functions.ILike(p.Descricao, $"%{search}%")); //Melhor tratado para PostgreSQL, que é o banco de dados utilizado. Com MySQL ou SQL Server, pode usar Contains normalmente.
 
             return query
                 .Include(p => p.Categoria)
