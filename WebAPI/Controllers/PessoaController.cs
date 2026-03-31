@@ -18,7 +18,7 @@ namespace WebAPI.Controllers
         /// Adiciona uma nova pessoa.
         /// </summary>
         [HttpPost]
-        public async Task<ActionResult> AddAsync([FromQuery] CreatePessoaRequest request)
+        public async Task<ActionResult> AddAsync([FromBody] CreatePessoaRequest request)
         {
             var result = await _pessoaService.AddAsync(request);
             return StatusCode((int)result.StatusCode, result);
@@ -48,7 +48,7 @@ namespace WebAPI.Controllers
         /// Atualiza uma pessoa existente por ID.
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateAsync(int id, [FromQuery] UpdatePessoaRequest request)
+        public async Task<ActionResult> UpdateAsync(int id, [FromBody] UpdatePessoaRequest request)
         {
             var result = await _pessoaService.UpdateAsync(id, request);
             return StatusCode((int)result.StatusCode, result);
