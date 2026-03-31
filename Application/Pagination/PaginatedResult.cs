@@ -33,19 +33,5 @@ namespace Application.Pagination
 
             return new PaginatedResult<T>(items, count, pageIndex, pageSize);
         }
-
-        public string ToHeaders()
-        {
-            var metadata = new
-            {
-                PageIndex,
-                PageSize,
-                TotalCount,
-                TotalPages,
-                HasPreviousPage,
-                HasNextPage
-            };
-            return JsonSerializer.Serialize(metadata);
-        }
     }
 }

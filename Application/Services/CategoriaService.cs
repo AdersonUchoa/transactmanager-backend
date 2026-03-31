@@ -6,10 +6,8 @@ using Application.Responses.Categoria;
 using Application.Responses.Transacao;
 using AutoMapper;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -106,33 +104,33 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteAsync(int id)
+        public async Task<ApiResponse<bool?>> DeleteAsync(int id)
         {
             try
             {
                 var categoria = await _categoriaRepository.GetByIdAsync(id);
-                if (categoria == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada", null);
+                if (categoria == null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, false, "Categoria não encontrada", null);
 
                 await _categoriaRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Categoria deletada com sucesso.", null);
+                return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Categoria deletada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<bool?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<List<CategoriaResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, CategoriaFinalidadeEnum? finalidade = null, string? search = null)
+        public async Task<ApiResponse<PaginatedResult<CategoriaResponse>>> GetAllAsync(GetCategoriasRequest request)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(search)) 
-                    search = search.Trim();
-                
-                var categorias = _categoriaRepository.GetAllAsync(finalidade, search);
+                if (!string.IsNullOrWhiteSpace(request.Search)) 
+                    request.Search = request.Search.Trim();
 
-                var paginated = await PaginatedResult<Categoria>.CreateAsync(categorias, page, limit);
+                var categorias = _categoriaRepository.GetAllAsync(request.Finalidade, request.Search);
+
+                var paginated = await PaginatedResult<Categoria>.CreateAsync(categorias, request.Page, request.Limit);
 
                 var ids = paginated.Items.Select(c => c.Id);
                 var totaisDict = await _transacaoRepository.GetTotalsByCategoriaIdsAsync(ids);
@@ -151,27 +149,27 @@ namespace Application.Services
                     };
                 }).ToList();
                 
-                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
+                var result = new PaginatedResult<CategoriaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
 
-                return new ApiResponse<List<CategoriaResponse>>(true, HttpStatusCode.OK, response, "Categorias obtidas com sucesso.", null);
+                return new ApiResponse<PaginatedResult<CategoriaResponse>>(true, HttpStatusCode.OK, result, "Categorias obtidas com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<CategoriaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<PaginatedResult<CategoriaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<int>> GetCategoriasCountAsync()
+        public async Task<ApiResponse<int?>> GetCategoriasCountAsync()
         {
             try
             {
                 var categorias = await _categoriaRepository.GetCategoriasCountAsync();
 
-                return new ApiResponse<int>(true, HttpStatusCode.OK, categorias, "Contagem de categorias obtida com sucesso.", null);
+                return new ApiResponse<int?>(true, HttpStatusCode.OK, categorias, "Contagem de categorias obtida com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<int?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
     }

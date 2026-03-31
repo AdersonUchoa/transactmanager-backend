@@ -10,7 +10,6 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -149,33 +148,33 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteAsync(int id)
+        public async Task<ApiResponse<bool?>> DeleteAsync(int id)
         {
             try
             {
                 var transacao = await _transacaoRepository.GetByIdAsync(id);
-                if (transacao is null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, null, "Transação não encontrada.", null);
+                if (transacao is null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, null, "Transação não encontrada.", null);
 
                 await _transacaoRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Transação deletada com sucesso.", null);
+                return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Transação deletada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<bool?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public async Task<ApiResponse<PaginatedResult<TransacaoResponse>>> GetAllAsync(GetTransacoesRequest request)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(search))
-                    search = search.Trim();
+                if (!string.IsNullOrWhiteSpace(request.Search))
+                    request.Search = request.Search.Trim();
 
-                var transacoes = _transacaoRepository.GetAllAsync(pessoaId, categoriaId, valor, tipo, search);
+                var transacoes = _transacaoRepository.GetAllAsync(request.PessoaId, request.CategoriaId, request.Valor, request.Tipo, request.Search);
 
-                var paginated = await PaginatedResult<Transacao>.CreateAsync(transacoes, page, limit);
+                var paginated = await PaginatedResult<Transacao>.CreateAsync(transacoes, request.Page, request.Limit);
 
                 var response = paginated.Items.Select(t => new TransacaoResponse
                 {
@@ -189,17 +188,17 @@ namespace Application.Services
                     Pessoa = new PessoaBasicResponse { Nome = t.Pessoa.Nome, Idade = t.Pessoa.Idade }
                 }).ToList();
 
-                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
+                var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
 
-                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, response, "Transações encontradas com sucesso.", null);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(true, HttpStatusCode.OK, result, "Transações encontradas com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllByPessoaIdAsync(int pessoaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public async Task<ApiResponse<PaginatedResult<TransacaoResponse>>> GetAllByPessoaIdAsync(int pessoaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             try
             {
@@ -207,7 +206,7 @@ namespace Application.Services
                     search = search.Trim();
 
                 var pessoa = await _pessoaRepository.GetByIdNoTrackingAsync(pessoaId);
-                if (pessoa is null) return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null);
+                if (pessoa is null) return new ApiResponse<PaginatedResult<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Pessoa não encontrada", null);
 
                 var transacoes = _transacaoRepository.GetByPessoaIdAsync(pessoa.Id, valor, tipo, search);
 
@@ -225,23 +224,23 @@ namespace Application.Services
 
                 var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
 
-                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações de {pessoa.Nome} encontradas com sucesso.", null);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações de {pessoa.Nome} encontradas com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<List<TransacaoResponse>>> GetAllByCategoriaIdAsync(int categoriaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public async Task<ApiResponse<PaginatedResult<TransacaoResponse>>> GetAllByCategoriaIdAsync(int categoriaId, int page, int limit, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
         {
             try
             {
                 if (!string.IsNullOrWhiteSpace(search))
                     search = search.Trim();
 
-                var categoria = await _categoriaRepository.GetByIdAsync(categoriaId);
-                if (categoria is null) return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null);
+                var categoria = await _categoriaRepository.GetByIdNoTrackingAsync(categoriaId);
+                if (categoria is null) return new ApiResponse<PaginatedResult<TransacaoResponse>>(false, HttpStatusCode.NotFound, null, "Categoria não encontrada", null);
 
                 var transacoes = _transacaoRepository.GetByCategoriaIdAsync(categoria.Id, valor, tipo, search);
 
@@ -259,25 +258,25 @@ namespace Application.Services
 
                 var result = new PaginatedResult<TransacaoResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
 
-                return new ApiResponse<List<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações da categoria {categoria.Descricao} encontradas com sucesso.", null);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(true, HttpStatusCode.OK, result, $"Transações da categoria {categoria.Descricao} encontradas com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<PaginatedResult<TransacaoResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<int>> GetTransacoesCountAsync()
+        public async Task<ApiResponse<int?>> GetTransacoesCountAsync()
         {
             try
             {
                 var count = await _transacaoRepository.GetTransacoesCountAsync();
 
-                return new ApiResponse<int>(true, HttpStatusCode.OK, count, "Contagem de transações recuperada com sucesso.", null);
+                return new ApiResponse<int?>(true, HttpStatusCode.OK, count, "Contagem de transações recuperada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<int?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
     }

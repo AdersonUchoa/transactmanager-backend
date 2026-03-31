@@ -8,7 +8,6 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Extensions;
 using Domain.Interfaces.Repositories;
-using Microsoft.AspNetCore.Http;
 using System.Net;
 
 namespace Application.Services
@@ -106,16 +105,16 @@ namespace Application.Services
             }
         }
 
-        public async Task<ApiResponse<List<PessoaResponse>>> GetAllAsync(HttpResponse httpResponse, int page, int limit, string? search = null)
+        public async Task<ApiResponse<PaginatedResult<PessoaResponse>>> GetAllAsync(GetPessoasRequest request)
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(search))
-                    search = search.Trim();
+                if (!string.IsNullOrWhiteSpace(request.Search))
+                    request.Search = request.Search.Trim();
 
-                var pessoas = _pessoaRepository.GetAllAsync(search);
+                var pessoas = _pessoaRepository.GetAllAsync(request.Search);
 
-                var paginated = await PaginatedResult<Pessoa>.CreateAsync(pessoas, page, limit);
+                var paginated = await PaginatedResult<Pessoa>.CreateAsync(pessoas, request.Page, request.Limit);
 
                 var ids = paginated.Items.Select(p => p.Id);
                 var totaisDict = await _transacaoRepository.GetTotalsByPessoaIdsAsync(ids);
@@ -134,44 +133,44 @@ namespace Application.Services
                     };
                 }).ToList();
 
-                httpResponse.Headers.Append("x-pagination", paginated.ToHeaders());
+                var result = new PaginatedResult<PessoaResponse>(response, paginated.TotalCount, paginated.PageIndex, paginated.PageSize);
 
-                return new ApiResponse<List<PessoaResponse>>(true, HttpStatusCode.OK, response, "Pessoas recuperadas com sucesso.", null);
+                return new ApiResponse<PaginatedResult<PessoaResponse>>(true, HttpStatusCode.OK, result, "Pessoas recuperadas com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<List<PessoaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<PaginatedResult<PessoaResponse>>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<bool>> DeleteAsync(int id)
+        public async Task<ApiResponse<bool?>> DeleteAsync(int id)
         {
             try
             {
                 var pessoa = await _pessoaRepository.GetByIdAsync(id);
-                if (pessoa == null) return new ApiResponse<bool>(false, HttpStatusCode.NotFound, false, "Pessoa não encontrada.", null);
+                if (pessoa == null) return new ApiResponse<bool?>(false, HttpStatusCode.NotFound, false, "Pessoa não encontrada.", null);
 
                 await _pessoaRepository.DeleteAsync(id);
 
-                return new ApiResponse<bool>(true, HttpStatusCode.OK, null, "Pessoa deletada com sucesso.", null);
+                return new ApiResponse<bool?>(true, HttpStatusCode.OK, null, "Pessoa deletada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<bool>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<bool?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
 
-        public async Task<ApiResponse<int>> GetPessoasCountAsync()
+        public async Task<ApiResponse<int?>> GetPessoasCountAsync()
         {
             try
             {
                 var count = await _pessoaRepository.GetPessoasCountAsync();
 
-                return new ApiResponse<int>(true, HttpStatusCode.OK, count, "Contagem de pessoas recuperada com sucesso.", null);
+                return new ApiResponse<int?>(true, HttpStatusCode.OK, count, "Contagem de pessoas recuperada com sucesso.", null);
             }
             catch (Exception ex)
             {
-                return new ApiResponse<int>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
+                return new ApiResponse<int?>(false, HttpStatusCode.InternalServerError, null, "Erro interno do servidor. Tente novamente mais tarde.", ex.Message);
             }
         }
     }
