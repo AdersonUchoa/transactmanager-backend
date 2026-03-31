@@ -39,9 +39,9 @@ namespace WebAPI.Controllers
         /// Obtém uma lista de categorias com paginação e filtros opcionais.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, string? search = null, CategoriaFinalidadeEnum? finalidade = null)
+        public async Task<ActionResult> GetAllAsync([FromQuery] GetCategoriasRequest request)
         {
-            var result = await _categoriaService.GetAllAsync(Response, page, limit, finalidade, search);
+            var result = await _categoriaService.GetAllAsync(request);
             return StatusCode((int)result.StatusCode, result);
         }
 

@@ -38,9 +38,9 @@ namespace WebAPI.Controllers
         /// Obtém uma lista de pessoas com paginação e filtro de busca.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, string? search = null)
+        public async Task<ActionResult> GetAllAsync([FromQuery] GetPessoasRequest request)
         {
-            var result = await _pessoaService.GetAllAsync(Response, page, limit, search);
+            var result = await _pessoaService.GetAllAsync(request);
             return StatusCode((int)result.StatusCode, result);
         }
 

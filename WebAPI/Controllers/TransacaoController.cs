@@ -59,9 +59,10 @@ namespace WebAPI.Controllers
         /// Obtém uma lista de transações com paginação e filtros opcionais.
         /// </summary>
         [HttpGet]
-        public async Task<ActionResult> GetAllAsync(int page = 1, int limit = 10, int? pessoaId = null, int? categoriaId = null, decimal? valor = null, TransacoesTipoEnum? tipo = null, string? search = null)
+        public async Task<ActionResult> GetAllAsync([FromQuery] GetTransacoesRequest request)
         {
-            var result = await _transacaoService.GetAllAsync(Response, page, limit, pessoaId, categoriaId, valor, tipo, search);
+            var result = await _transacaoService.GetAllAsync(request);
+
             return StatusCode((int)result.StatusCode, result);
         }
 
