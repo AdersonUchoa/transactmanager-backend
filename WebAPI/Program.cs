@@ -1,3 +1,5 @@
+using Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 using WebAPI.IoC;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,5 +29,23 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<TransactManagerContext>>();
+    try
+    {
+        logger.LogInformation("Verificando e aplicando Migrations pendentes no banco de dados");
+        var context = services.GetRequiredService<TransactManagerContext>();
+        context.Database.Migrate();
+        logger.LogInformation("Migrations aplicadas com sucesso");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Ocorreu um erro ao tentar aplicar as migrations.");
+    }
+}
 
 app.Run();
